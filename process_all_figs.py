@@ -1,4 +1,3 @@
-
 #%%
 # import necessary libraries
 import numpy as np
@@ -22,10 +21,17 @@ def main():
     # so the first part is to convert the real data into averaged differential images, sving those into a analysis*dataset file
     data = load_figure_1()
     # plot
-    plot_differential_images(data)
+    #plot_differential_images(data)
 
-    # get azimuthal profiles
-    profiles, time_arr, amplitudes, centers, X = get_azim_profiles(data)
+    azim_profiles = []
+    time_arr = []
+    for key in sorted(data.keys()):
+        image = data[key]
+        center, prof = find_center_pixel(image)
+        azim_profiles.append(prof)
+        time_arr.append(float(key))
+    profiles = np.array(azim_profiles)
+    time_arr = np.array(time_arr)
 
     plot_azim_profiles_fits(profiles, time_arr)
 
@@ -178,7 +184,9 @@ def create_all_datasets():
             print(f"Dataset created for folder: {subfolder}")
 
 folder = r'P:\Lab\Shared\SharedPythonScripts\Publications\WSe2_anomalous_diffusion\data\power_dep\2.220/'
-create_all_datasets()
+#create_all_datasets()
+dat_dict = create_dataset(folder)
+
 
 #%%
 

@@ -9,6 +9,9 @@ from scipy.optimize import curve_fit
 px_size = 0.09 / 1.5  # um
 
 names_code = '*dataset*.npy'  # pattern to find analyzed dataset files
+# Function to make a ROI given a single point and a size (square)
+def make_ROI(x, y, size = 20):
+    return [[x, x+size], [y, y+size]]
 
 def gaussian(x, A, x0, sigma,):
     return A * np.exp(-(x - x0) ** 2 / (2 * sigma ** 2))
@@ -38,7 +41,7 @@ def plot_differential_images(data):
         plt.show()  
 
 def find_center(image):
-    # find the center of the image by finding the minimum value
+    # find the center of the image by finding the minimum value, not very robust
     center = np.unravel_index(np.argmin(image, axis=None), image.shape)
     return center
 
@@ -67,6 +70,43 @@ def azimuthal_average(image, center=None):
 
     return radialprofile, center 
 
+def find_center_pixel(img, ROI = make_ROI(62, 72, size = 20) ):
+
+    # first create a grid around the ROI (only 10x10
+    im_crop = img[ROI[1][0]: ROI[1][1], ROI[0][0]: ROI[0][1]]
+
+    # first, get the line where the min inside this ROI is
+    min_idx = np.unravel_index(np.argmin(im_crop), im_crop.shape)
+    line_idx = min_idx[0] + ROI[1][0]
+    linecut_target = img[line_idx, img.shape[1]//2:] # we will use this linecut as target for a azimuthal score
+
+    # reduce further to 10x10
+    sub_ROI = make_ROI( (ROI[0][1] - ROI[0][0])//2 -5 + ROI[0][0], (ROI[1][1] - ROI[1][0])//2 -5 + ROI[1][0], size = 10)
+    im_subcrop = img[sub_ROI[1][0]: sub_ROI[1][1], sub_ROI[0][0]: sub_ROI[0][1]]
+    #plt.imshow(im_subcrop, cmap='gray')
+    # for each of these, get the azimuthal average score with respect to the target linecut
+    scores = []
+    azim_avs = []
+    for i in range(im_subcrop.shape[0]):
+        for j in range(im_subcrop.shape[1]):
+            center = (i + sub_ROI[1][0], j + sub_ROI[0][0])
+            azim_av, cent = azimuthal_average(img, center = center)
+            # remove first point in azim_av to avoid the center pixel
+            azim_av = azim_av
+            r = np.arange(len(azim_av))
+            # add a score based on how similar the azim_av is to the target linecut
+            score = 1 - np.mean( azim_av[:len(linecut_target)] - linecut_target)
+            scores.append( (score, center) )
+            azim_avs.append(azim_av)
+
+    # find the center pixel as the one with the highest score
+    if scores:
+        best_score, best_center = max(scores, key=lambda x: x[0])
+        best_azim = azim_avs[scores.index((best_score, best_center))]
+    else:
+        print(f"Best center pixel: {best_center} with score: {best_score}")
+    return best_center, best_azim[1:]
+
 def get_azim_profiles(corrected_dict, center = None):
 
     # get the azimuthal profiles for each time delay
@@ -75,19 +115,14 @@ def get_azim_profiles(corrected_dict, center = None):
     time_arr = []
     centers = []
 
-    key_0 = list(corrected_dict.keys())[0]
-    data_0 = -corrected_dict[key_0]
-    center = find_center(data_0) # get the center of the image
+    #key_0 = list(corrected_dict.keys())[0]
+    #data_0 = corrected_dict[key_0]
+    #center = find_center(data_0) # get the center of the image
 
     for i, key in enumerate(corrected_dict.keys()):
         data = corrected_dict[key]
         # get the azimuthal average
-        if i == 0:
-            center = find_center(data)
-        else:
-            center = center 
-        radialprofile, center_ = azimuthal_average(data, center = center)
-
+        center_, radialprofile = find_center_pixel(data)
         profiles.append(radialprofile)
         time_arr.append(float(key))
         centers.append(center_)
@@ -106,6 +141,7 @@ def get_azim_profiles(corrected_dict, center = None):
 
     return profiles, time_arr, amplitudes, centers, X
 
+from scipy.optimize import curve_fit
 def plot_azim_profiles_fits(profiles, time_arr):
     # plot azimuthal profiles and fits
     X = np.arange(len(profiles[0])) * px_size  # in um
@@ -117,10 +153,10 @@ def plot_azim_profiles_fits(profiles, time_arr):
         plt.plot(X, profile_, label='Data', marker='o', linestyle='None', color = 'black', markersize=12,
                  markerfacecolor='none', markeredgewidth=4)
         # fit with gaussian
-        from scipy.optimize import curve_fit
-        p0 = [profile_.max(), 0, sigma_guess]
         try:
-            popt, pcov = curve_fit(gaussian, X, profile_, p0=p0)
+            popt, pcov = curve_fit(gaussian, X, profile_, 
+                    p0 = [profile_.max(), 0, sigma_guess],
+            )
         except RuntimeError:
             print(f"Fit failed for time {time_arr[i]} ns")
             continue

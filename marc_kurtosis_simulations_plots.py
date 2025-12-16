@@ -4,17 +4,15 @@
 
 import numpy as np
 import matplotlib.pyplot as plt
+import os
 
 # fontparameters
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['font.size'] = 28
 
-#save_fol = r'C:\Users\earro\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\fig2/'
-#save_fol = r'D:\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\fig2/'
-
 # load data
-data = r'C:\Users\earro\Downloads\marc_sims/kurtosis_vs_time_diff_initial_kurtosis.dat'
-#data = r'D:\DATA\Sims_marc/kurtosis_vs_time_diff_initial_kurtosis.dat'
+data_folder = data_folder = os.getcwd() + '\\data\\simulation_results\\'
+data = data_folder + 'kurtosis_vs_time_diff_initial_kurtosis.dat'
 data = np.loadtxt(data)
 
 # extract columns
@@ -60,9 +58,9 @@ import matplotlib.pyplot as plt
 plt.rcParams['font.family'] = 'Arial'
 plt.rcParams['font.size'] = 28
 # load data
-data = r'C:\Users\earro\Downloads\marc_sims\Re_ Discussion on new publication/'
-#data = r'D:\DATA\Sims_marc\model_comparison\Re_ Exciton diffusion_ WSe2_ evolution of kurtosis/'
-Auger = np.loadtxt(data + 'Auger.dat')
+data_folder = os.getcwd() + '\\data\\simulation_results\\anomalous\\'
+data = data_folder + '/'
+Auger = np.loadtxt(data_folder + 'Auger.dat')
 Auger_kurt = np.loadtxt(data + 'Auger.kurtosis.dat')
 
 # deep traps
@@ -119,22 +117,18 @@ plt.tick_params(axis='both', which='both', direction='in', top=True, right=True)
 plt.tick_params(axis='both', which='major', length=5, width=2)
 plt.tick_params(axis='both', which='minor', length=3, width=1)
 
-#save_fol = r'C:\Users\earro\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\fig2/'
-#plt.savefig(save_fol + 'kurtosis_different_scenarios.svg', dpi=300, bbox_inches='tight')
-
 plt.show()
 
 # %%
 import numpy as np
 import matplotlib.pyplot as plt
-folder = r'C:\Users\earro\OneDrive - UAM\PhoND\Lab\Sims\variation\variation/'
-#folder = r'C:\Users\PhoNDJaen\Downloads\variation\variation/'
-# first plot the ones for different trap density
+data_folder = os.getcwd() + '\\data\\simulation_results\\parameters/'
+
 import glob
 
-file_ref = folder + 'complete_2.220uJcm2.dat'
+file_ref = data_folder + 'complete_2.220uJcm2.dat'
 
-files = glob.glob(folder + 'c0*kurtosis.dat')
+files = glob.glob(data_folder + 'c0*kurtosis.dat')
 file_0 = files[2]
 file_1 = files[1]
 file_2 = files[4]
@@ -169,14 +163,9 @@ plt.tick_params(axis='both', which='both', direction='in', top=True, right=True,
                 labelsize=28)
 plt.tick_params(axis='both', which='major', length=5, width=2)
 plt.tick_params(axis='both', which='minor', length=3, width=1)
-
-
-save_fol = r'C:\Users\earro\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\fig2/'
-plt.savefig(save_fol + 'kurtosis_different_trap_density.pdf', dpi=300, bbox_inches='tight')
-
 # %%
 
-files = glob.glob(folder + 'mu2*kurtosis.dat')
+files = glob.glob(data_folder + 'mu2*kurtosis.dat')
 file_0 = files[2]
 file_1 = files[0]
 file_2 = files[4]
@@ -211,7 +200,7 @@ plt.legend(frameon=False, fontsize=24)
 
 # trap decay rate
 
-files = glob.glob(folder + 'nu2*kurtosis.dat')
+files = glob.glob(data_folder + 'nu2*kurtosis.dat')
 file_0 = files[0]
 file_1 = files[1]
 file_2 = files[2]
@@ -246,7 +235,7 @@ plt.legend(frameon=False, fontsize=24)
 
 # trapping rate
 
-files = glob.glob(folder + 'lambda2*kurtosis.dat')
+files = glob.glob(data_folder + 'lambda2*kurtosis.dat')
 file_0 = files[3]
 file_1 = files[0]
 file_2 = files[5]
@@ -279,7 +268,7 @@ plt.legend(frameon=False, fontsize=24)
 # %%
 
 # different Auger rates
-files = glob.glob(folder + 'rho*kurtosis.dat')
+files = glob.glob(data_folder + 'rho*kurtosis.dat')
 
 file_0 = files[2]
 file_1 = files[1]
@@ -309,30 +298,9 @@ plt.legend(frameon=False, fontsize=24)
 # %%
 
 
-# lets plot a simple fake thingy
-
-
-decay = 2*np.exp(-time_arr/2) -0.5
-decay_fast = 2.3*np.exp(-time_arr/0.5) -0.5
-decay_way_fast = 4.2*np.exp(-time_arr/0.1) -0.5
-
-plt.plot(time_arr, decay, label='decay', color='black', linewidth=3)
-plt.plot(time_arr, decay_fast, label='decay fast', color='red', linewidth=3)
-plt.plot(time_arr, decay_way_fast, label='decay way fast', color='blue', linewidth=3)
-plt.xlim(-0.01, 6)
-plt.ylim(-0.61, 1.1)
-
-plt.xticks(np.arange(0, 8, 2.), fontsize=22)
-plt.yticks(np.arange(-0.5, 1.6, 0.5), fontsize=22)
-plt.axhline(0, color='black', linestyle='--', linewidth=2)
-plt.xlabel('Time (ns)', fontsize=22)
-plt.ylabel('Excess Kurtosis', fontsize=22)
-
-
 # %%
 
-#file = r'D:\DATA\Sims_marc\traps/diffmap_shallow.dat'
-file = r'C:\Users\earro\OneDrive - UAM\PhoND\Lab\Sims\profiles/diffmap_shallow.dat'
+file = os.getcwd() + '\\data\\simulation_results\\profiles/diffmap_shallow.dat'
 data = np.loadtxt(file)
 
 X = np.linspace(-2, 2, len(data[0]))
@@ -366,9 +334,6 @@ plt.tick_params(axis='both', which='minor', labelsize=16,
 
 plt.xlim(-2.1, 2.1)
 plt.ylim(0, 1.1)
-#save_fol = r'D:\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\slides\Drawings/'
-#save_fol = r'C:\Users\earro\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\SI/' 
-#plt.savefig(save_fol + 'diffmap_shallow_profiles.pdf', dpi=300, bbox_inches='tight')
 
 #%%
 
@@ -409,7 +374,9 @@ plt.plot(time_array_sim, EK, label='Phonons', color='purple', linewidth=2)
 
 
 #%%
-file = r'C:\Users\earro\Downloads\marc_sims/excess_kurtosis_vs_time.dat'
+
+
+file = os.getcwd() + '\\data\\simulation_results\\excess_kurtosis_vs_time.dat'
 data = np.loadtxt(file)
 
 time = data[:, 0]
@@ -446,8 +413,7 @@ plt.tick_params(axis='both', which='minor', labelsize=32,
 #plt.savefig(save_fol + 'kurtosis_different_scenarios_EK1.svg', dpi=300, bbox_inches='tight')
 # %%
 
-
-file = file = r'C:\Users\earro\Downloads\marc_sims/excess_kurtosis_vs_time_Auger.dat'
+file = os.getcwd() + '\\data\\simulation_results\\excess_kurtosis_vs_time_auger.dat'
 data = np.loadtxt(file)
 
 rhos = [0.05, 0.5, 5, ]  # Auger rates in um^2/ns
@@ -481,6 +447,4 @@ plt.tick_params(axis='both', which='minor', labelsize=16,
                 top=True, right=True, direction='in', length=3, width=1,
                 )
 
-#save_fol = r'C:\Users\earro\OneDrive - UAM\PhoND\Paper_figures\Wse_traps\fig2/'
-#plt.savefig(save_fol + 'kurtosis_different_Auger_rates.svg', dpi=300, bbox_inches='tight')
 # %%
